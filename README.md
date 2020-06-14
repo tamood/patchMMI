@@ -9,7 +9,7 @@ XPM flow is recommended for patchMMI that converts Vivado-generated MMI file con
 
 # Usage
 
-1) Use XPM instance within BootROM.
+1) Use XPM instance within BootROM. vlsi_rom_gen script is provided to replace one in $(rocketchip_dir)/scripts.
 2) Generate MMI using following command withing Vivado after bitstream generation.
 
 write_mem_info rom.mmi
