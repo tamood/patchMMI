@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 
 # See LICENSE.SiFive for license details.
 
@@ -9,7 +9,6 @@ from __future__ import unicode_literals
 import doctest
 import sys
 import warnings
-from collections import namedtuple
 
 verilog_template = """
 module {name}(
@@ -83,51 +82,15 @@ def gen_rom(name, width, depth, rom_hex_file):
     return verilog_template.format(**variables)
 
 
-def iterate_by_n(it, n):
-    """Iterate over items in it, yielding n-tuples of successive items.
-
-    >>> list(iterate_by_n([1, 2, 3, 4, 5, 6], n=2))
-    [(1, 2), (3, 4), (5, 6)]
-    >>> list(iterate_by_n([1, 2, 3, 4, 5, 6], n=3))
-    [(1, 2, 3), (4, 5, 6)]
-    >>> list(iterate_by_n([1, 2, 3, 4, 5, 6], n=4))
-    Traceback (most recent call last):
-        ...
-    ValueError: Iterable length not evenly divisible by 4
-    """
-    it = iter(it)
-    while True:
-        batch = ()
-        for i in range(n):
-            try:
-                batch += (next(it),)
-            except StopIteration:
-                if batch:  # If this is not the first iteration
-                    raise ValueError(
-                        'Iterable length not evenly divisible by {}'.format(n)
-                    )
-                else:
-                    raise
-        yield batch
-
-
 def try_cast_int(x):
     try:
         return int(x)
     except ValueError:
         return x
 
-
-ROMParameters = namedtuple('ROMParameters', ['name', 'depth', 'width'])
-default_rom_parameters = ROMParameters(name='', depth=0, width=0)
-
-
 def parse_line(line):
-    kwargs = {key: try_cast_int(val)
-              for key, val in iterate_by_n(line.split(), 2)}
-    rom_parameters = default_rom_parameters._replace(**kwargs)
-    return rom_parameters._asdict()
-
+    x=line.split()
+    return { x[i] : try_cast_int(x[i+1]) for i in range(0, len(x), 2 ) }
 
 def main():
     if '--run-tests' in sys.argv:
@@ -143,8 +106,7 @@ def main():
         if len(lines) > 1:
             warnings.warn('vlsi_rom_gen detected multiple ROMs. ROM contents will be duplicated.')
         for line in lines:
-            verilog = gen_rom(rom_hex_file=sys.argv[2],
-                              **parse_line(line))
+            verilog = gen_rom(rom_hex_file=sys.argv[2], **parse_line(line))
             print(verilog)
 
 if __name__ == '__main__':
